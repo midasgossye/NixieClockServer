@@ -2,9 +2,8 @@ from flask import Flask, render_template, redirect, request
 import os
 import subprocess
 import socket
-import datetime
+import time
 from time import sleep
-import importlib
 
 
 
@@ -20,7 +19,7 @@ app.debug = True
 def hello_world():
     ssid_name = get_wifi_ssid()
     ip_addr = get_ip_address()
-    server_time = datetime.datetime.now().strftime("%H:%M:%S")
+    server_time = time.strftime("%H:%M:%S %Z")
     return render_template('app.html', ssid_name = ssid_name, ip_addr = ip_addr, server_time = server_time)
 
 @app.route('/set_timezone')
@@ -36,7 +35,8 @@ def save_timezone():
     print(timeconfig_out)
     print(err)
     sleep(2)
-    importlib.reload(datetime)
+    time.tzset()
+    sleep(2)
     return redirect('/')
 
 
