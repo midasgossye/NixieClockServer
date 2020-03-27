@@ -32,6 +32,8 @@ def save_timezone():
     print(time_zone)
     timeconfig = subprocess.Popen(['sudo', 'timedatectl', 'set-timezone', time_zone], stdout=subprocess.PIPE)
     timeconfig_out, err = timeconfig.communicate()
+    print(timeconfig_out)
+    print(err)
     sleep(2)
     return redirect('/')
 
