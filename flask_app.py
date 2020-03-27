@@ -29,7 +29,7 @@ def hello_world():
         for line in raw_lines:
             if 'Time zone' in line:
                 idx = line.find(':')
-                server_timezone = line[idx+2:-1]
+                server_timezone = line[idx+2:]
                 break
 
         print(server_timezone)
