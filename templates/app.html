@@ -13,23 +13,26 @@
       <li class="list-group-item">
         <b>IP address:</b> {{ip_addr}}</li>
     </ul>
-  </div>
-  <div class="card" style="width: 18rem;">
+
+ 
     <div class="card-header">
       Time settings
     </div>
 
     <ul class="list-group list-group-flush">
       <li class="list-group-item">
-        <b>User time:</b><span id="time"></span>
+        <b>User time:</b> <span id="time"></span>
       </li>
       <li class="list-group-item">
-        <b>Nixie clock time:</b>{{server_time}}
+        <b>Nixie clock time:</b> {{server_time}}
+      </li>
+      <li class="list-group-item">
+        <b>Timezone:</b> {{server_timezone}}
+        <a class="btn btn-primary" href="set_timezone" role="button">Set timezone</a>
       </li>
     </ul>
   </div>
 
-  <a class="btn btn-primary" href="set_timezone" role="button">Set timezone</a>
 </div>
 <script>
   function startTime() {

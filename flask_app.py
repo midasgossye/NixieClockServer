@@ -20,7 +20,23 @@ def hello_world():
     ssid_name = get_wifi_ssid()
     ip_addr = get_ip_address()
     server_time = time.strftime("%H:%M:%S %Z")
-    return render_template('app.html', ssid_name = ssid_name, ip_addr = ip_addr, server_time = server_time)
+
+    if OS_NAME == 'LINUX':
+        timedatectl = subprocess.Popen(['timedatectl'], stdout=subprocess.PIPE)
+        timedatectl_out, err = timedatectl.communicate()
+        raw_lines =  timedatectl_out.decode('utf-8').rsplit('\n')
+
+        for line in raw_lines:
+            if 'Time zone' in line:
+                idx = line.find(':')
+                server_timezone = line[idx+2:-1]
+                break
+
+        print(server_timezone)
+    else:
+        server_timezone = 'unavailable'
+    
+    return render_template('app.html', ssid_name = ssid_name, ip_addr = ip_addr, server_time = server_time, server_timezone = server_timezone)
 
 @app.route('/set_timezone')
 def set_timezone():
