@@ -1,10 +1,12 @@
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, jsonify
 import os
 import subprocess
 import socket
 import time
 from time import sleep
-
+import configparser
+import requests
+import json
 
 
 if os.name == 'nt':
@@ -15,12 +17,75 @@ else:
 app = Flask(__name__)
 app.debug = True
 
+config = configparser.ConfigParser()
+
 @app.route('/')
 def hello_world():
+    config.read('conf.ini')
+
     ssid_name = get_wifi_ssid()
     ip_addr = get_ip_address()
     server_time = time.strftime("%H:%M:%S %Z")
 
+    server_timezone = get_server_timezone()
+
+    openweather_enabled = config['Weather'].getboolean('OpenWeatherEnabled')
+    openweather_city = config['Weather']['City']
+    openweather_api_key = config['Weather']['ApiKey']
+
+    if openweather_enabled:
+        temp = get_local_temp(openweather_city, openweather_api_key)
+    else:
+        temp = 0
+    
+    return render_template('app.html', ssid_name = ssid_name, ip_addr = ip_addr, server_time = server_time, server_timezone = server_timezone, openweather_enabled = openweather_enabled, openweather_city = openweather_city, openweather_api_key=  openweather_api_key, temp = temp)
+
+@app.route('/set_timezone')
+def set_timezone():
+    return render_template('set_timezone.html')
+
+@app.route('/save_timezone', methods = ['GET', 'POST'])
+def save_timezone():
+    time_zone = request.form['timezone']
+    set_system_timezone(time_zone)
+
+    return redirect('/')
+
+@app.route('/_change_api_key')
+def change_api_key():
+    api_key = request.args.get('api_key', type=str)
+    print(api_key)
+    openweather_city = config['Weather']['City']
+    temp = get_local_temp(openweather_city, api_key)
+
+    config['Weather']['ApiKey'] = api_key
+    with open('conf.ini', 'w') as configfile:
+        config.write(configfile)
+
+    return jsonify(api_key=api_key, temp=temp)
+
+@app.route('/_change_city')
+def change_city():
+    city_name = request.args.get('city_name', type=str)
+    openweather_api_key = config['Weather']['ApiKey']
+    config['Weather']['City'] = city_name
+    with open('conf.ini', 'w') as configfile:
+        config.write(configfile)
+    temp = get_local_temp(city_name, openweather_api_key)
+    return jsonify(temp=temp)
+
+
+def get_local_temp(weather_location, weather_api_key):
+    try:
+        r = requests.get("http://api.openweathermap.org/data/2.5/weather", params = {'q' : weather_location, 'appid' : weather_api_key}, timeout=0.1)
+        weather_data = json.loads(r.text)
+        temp = int(round(weather_data[u'main'][u'temp'])-273.15)
+    except:
+        return -1000
+
+    return temp
+
+def get_server_timezone():
     if OS_NAME == 'LINUX':
         timedatectl = subprocess.Popen(['timedatectl'], stdout=subprocess.PIPE)
         timedatectl_out, err = timedatectl.communicate()
@@ -35,26 +100,20 @@ def hello_world():
         print(server_timezone)
     else:
         server_timezone = 'unavailable'
-    
-    return render_template('app.html', ssid_name = ssid_name, ip_addr = ip_addr, server_time = server_time, server_timezone = server_timezone)
 
-@app.route('/set_timezone')
-def set_timezone():
-    return render_template('set_timezone.html')
+    return server_timezone
 
-@app.route('/save_timezone', methods = ['GET', 'POST'])
-def save_timezone():
-    time_zone = request.form['timezone']
-    print(time_zone)
-    timeconfig = subprocess.Popen(['sudo', 'timedatectl', 'set-timezone', time_zone], stdout=subprocess.PIPE)
-    timeconfig_out, err = timeconfig.communicate()
-    print(timeconfig_out)
-    print(err)
-    sleep(2)
-    time.tzset()
-    sleep(2)
-    return redirect('/')
-
+def set_system_timezone(time_zone):
+    if OS_NAME == 'LINUX':
+        timeconfig = subprocess.Popen(['sudo', 'timedatectl', 'set-timezone', time_zone], stdout=subprocess.PIPE)
+        timeconfig_out, err = timeconfig.communicate()
+        #print(timeconfig_out)
+        #print(err)
+        sleep(2)
+        time.tzset()
+        sleep(2)
+    else:
+        print("Function not available on " + OS_NAME)
 
 def get_wifi_ssid():
     if OS_NAME == 'LINUX':

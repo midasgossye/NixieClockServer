@@ -3,7 +3,7 @@
 {% block body %}
 <div class="container">
   <h1>Nixie Clock status</h1>
-  <div class="card" style="width: 36rem;">
+  <div class="card">
     <div class="card-header">
       Connection status
     </div>
@@ -31,24 +31,35 @@
         <a class="btn btn-primary" href="set_timezone" role="button">Set timezone</a>
       </li>
     </ul>
+
+    <div class="card-header">
+      Weather settings
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <b>Show local temperature: </b> 
+        {% if openweather_enabled %}
+        Yes
+        {% else %}
+        No
+        {% endif %}
+      </li>
+      <li class="list-group-item">
+        <b>City: </b> <span id="weather_city" >{{openweather_city}} <img src="static/img/edit.svg" id="edit_city" onclick="editCity()" /></span>
+      </li>
+      <li class="list-group-item">
+        <b>API key: </b> <span id="api_key" >{{openweather_api_key}} <img src="static/img/edit.svg" id="edit_api_key" onclick="editAPIkey()" /></span>
+      </li>
+      {% if openweather_enabled %}
+      <li class="list-group-item">
+        <b>Temperature in <span id="weather_city_2">{{openweather_city}}</span>: </b> <span id="temp">{% if temp < -100 %}Unable to fetch temperature{% else %}{{temp}} C{%endif%}</span>
+      </li>
+      {% endif %}
+    </ul>
+
   </div>
 
 </div>
-<script>
-  function startTime() {
-    var today = new Date();
-    var h = today.getHours();
-    var m = today.getMinutes();
-    var s = today.getSeconds();
-    m = checkTime(m);
-    s = checkTime(s);
-    document.getElementById('time').innerHTML =
-      h + ":" + m + ":" + s;
-  }
-  function checkTime(i) {
-    if (i < 10) { i = "0" + i };  // add zero in front of numbers < 10
-    return i;
-  }
-  $(document).ready(startTime());
-</script>
+<script type="text/javascript" src="static/js/js_code.js"></script>
+
 {% endblock %}
