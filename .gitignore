@@ -5,6 +5,7 @@
 *.pyc
 *.pyo
 env/
+venv/
 env*
 dist/
 build/

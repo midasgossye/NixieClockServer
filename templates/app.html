@@ -2,47 +2,50 @@
 
 {% block body %}
 <div class="container">
-<h1>Nixie Clock status</h1>
-<div class="card" style="width: 18rem;">
-  <div class="card-header">
-    Connection status
+  <h1>Nixie Clock status</h1>
+  <div class="card" style="width: 18rem;">
+    <div class="card-header">
+      Connection status
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <b>SSID:</b> {{ssid_name}}</li>
+      <li class="list-group-item">
+        <b>IP address:</b> {{ip_addr}}</li>
+    </ul>
   </div>
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item">
-    <b>SSID:</b> {{ssid_name}}</li>
-    <li class="list-group-item">
-    <b>IP address:</b> {{ip_addr}}</li>
-  </ul>
-</div>
-<div class="card" style="width: 18rem;">
-  <div class="card-header">
-    Time settings
+  <div class="card" style="width: 18rem;">
+    <div class="card-header">
+      Time settings
+    </div>
+
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item">
+        <b>User time:</b><span id="time"></span>
+      </li>
+      <li class="list-group-item">
+        <b>Nixie clock time:</b>{{server_time}}
+      </li>
+    </ul>
   </div>
 
-  <ul class="list-group list-group-flush">
-    <li class="list-group-item">
-      <b>User time:</b><span id="time"></span>
-    </li>
-    <li class="list-group-item">
-      <b>Nixie clock time:</b>{{server_time}}
-    </li>
-  </ul>
+  <a class="btn btn-primary" href="set_timezone" role="button">Set timezone</a>
 </div>
 <script>
-function startTime() {
-  var today = new Date();
-  var h = today.getHours();
-  var m = today.getMinutes();
-  var s = today.getSeconds();
-  m = checkTime(m);
-  s = checkTime(s);
-  document.getElementById('time').innerHTML =
-  h + ":" + m + ":" + s;
-}
-function checkTime(i) {
-  if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
-  return i;
-}
-$( document ).ready(startTime());
+  function startTime() {
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    document.getElementById('time').innerHTML =
+      h + ":" + m + ":" + s;
+  }
+  function checkTime(i) {
+    if (i < 10) { i = "0" + i };  // add zero in front of numbers < 10
+    return i;
+  }
+  $(document).ready(startTime());
 </script>
 {% endblock %}
